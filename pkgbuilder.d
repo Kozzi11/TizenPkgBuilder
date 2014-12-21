@@ -10,13 +10,14 @@ class Parser
 {
     typeof(byLine("")) content;
     string url;
-    string os;
+    OperatingSystem os;
+
     PackageInfo[string] packagesInfo;
 
     this(string url, string os)
     {
-        this.url = url;
-        this.os = os;
+        this.url = url[$-1] == '/' ? url : url ~ "/";
+        this.os = OperatingSystem(os);
         this.content = byLine(url ~ "/" ~ "pkg_list_" ~ os);
     }
 
@@ -56,6 +57,25 @@ class Parser
 
 private:
 
+struct OperatingSystem {
+
+    string arch;
+    string name;
+
+    this(string os) {
+        auto result = splitter(os, "-").array;
+        if (result.length == 2)
+        {
+            name = result[0];
+            arch = result[1];
+        }
+        else
+        {
+            throw new Exception("Bad OS");
+        }
+    }
+}
+
 enum PropertyName : string {
     Package = "Package",
     Version = "Version",
@@ -84,15 +104,13 @@ enum PropertyName : string {
 struct PackageInfo {
     string name;
     string ver;
-    string arch;
+    OperatingSystem os;
     string path;
     string checksum;
     string desc;
-    string sdeps;
-    string sconflicts;
-    string[] otherDeps;
-    PackageInfo[] deps;
-    PackageInfo[] conflicts;
+    string deps;
+    string conflicts;
+    string cdeps;
     
     void fillProperty(string property, string value) {
         PropertyName pn = cast(PropertyName)(property);
@@ -104,7 +122,7 @@ struct PackageInfo {
                 ver = value;
                 break;
             case OS:
-                arch = "64";
+                os = OperatingSystem(value);
                 break;
             case Path:
                 path = value;
@@ -113,16 +131,16 @@ struct PackageInfo {
                 checksum = value;
                 break;
             case CPrerequisites:
-                otherDeps ~= value;
+                cdeps = value;
                 break;
             case Description:
                 desc = value;
                 break;
             case InstallDependency:
-                sdeps = value;
+                deps = value;
                 break;
             case Conflicts:
-                sconflicts = value;
+                conflicts = value;
                 break;
             case Attribute:
             case Label:
