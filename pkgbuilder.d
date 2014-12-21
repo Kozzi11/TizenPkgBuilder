@@ -8,12 +8,6 @@ import std.range : array;
 
 class Parser
 {
-    typeof(byLine("")) content;
-    string url;
-    OperatingSystem os;
-
-    PackageInfo[string] packagesInfo;
-
     this(string url, OperatingSystem os)
     {
         this.url = url[$-1] == '/' ? url : url ~ "/";
@@ -52,6 +46,12 @@ class Parser
             writeln(to!string(++index) ~ ": " ~ pName ~ " : " ~ pData.name);
         }
     }
+
+private:
+    typeof(byLine("")) content;
+    string url;
+    OperatingSystem os;
+    PackageInfo[string] packagesInfo;
 }
 
 struct OperatingSystem
