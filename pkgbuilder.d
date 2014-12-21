@@ -18,21 +18,26 @@ class Parser
     void run()
     {
         PackageInfo pi;
-        foreach (line; content) {
+        foreach (line; content)
+        {
             auto lineData = splitter(line, ":");
-            if (!lineData.empty) {           
+            if (!lineData.empty)
+            {
                 import std.string : strip;
                 
                 string field = strip(to!string(lineData.front));
                 string value;
                 
                 lineData.popFront;
-                if (!lineData.empty) {
+                if (!lineData.empty)
+                {
                     value = strip(to!string(lineData.front));
                 }
                 
                 pi.fillProperty(field, value);
-            } else {
+            }
+            else
+            {
                 packagesInfo[pi.name] = pi;
                 pi = PackageInfo();
             }
@@ -42,7 +47,8 @@ class Parser
     void print()
     {
         size_t index;
-        foreach (pName, pData; packagesInfo) {
+        foreach (pName, pData; packagesInfo)
+        {
             writeln(to!string(++index) ~ ": " ~ pName ~ " : " ~ pData.name);
         }
     }
@@ -90,7 +96,8 @@ struct OperatingSystem
 
 private:
 
-enum PropertyName : string {
+enum PropertyName : string
+{
     Package = "Package",
     Version = "Version",
     OS = "OS",
@@ -115,7 +122,8 @@ enum PropertyName : string {
     Label = "Label",
 }
 
-struct PackageInfo {
+struct PackageInfo
+{
     string name;
     string ver;
     OperatingSystem os;
@@ -126,9 +134,11 @@ struct PackageInfo {
     string conflicts;
     string cdeps;
     
-    void fillProperty(string property, string value) {
+    void fillProperty(string property, string value)
+    {
         PropertyName pn = cast(PropertyName)(property);
-        with(PropertyName) final switch (pn) {
+        with(PropertyName) final switch (pn)
+        {
             case Package:
                 name = value;
                 break;
