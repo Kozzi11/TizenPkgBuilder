@@ -1,6 +1,6 @@
 ﻿module main;
 
-import pkgbuilder : Parser;
+import pkgbuilder : Parser, OperatingSystem;
 import std.stdio;
 import std.getopt;
 
@@ -8,13 +8,15 @@ import std.getopt;
 void main(string[] args)
 {
     string url = "http://download.tizen.org/sdk/packages-2.3/official";
-    string os = "ubuntu-64";
+    string os_name = "ubuntu";
+    string os_arch = "64";
     getopt(args,
            "url", &url,
-           "os", &os
+           "os_name", &os_name,
+           "os_arch", &os_arch,
            );
     
-    Parser parser = new Parser(url, os);
+    Parser parser = new Parser(url, OperatingSystem(os_name, os_arch));
 
     parser.run();
     parser.print();

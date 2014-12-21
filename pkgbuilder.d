@@ -14,10 +14,10 @@ class Parser
 
     PackageInfo[string] packagesInfo;
 
-    this(string url, string os)
+    this(string url, OperatingSystem os)
     {
         this.url = url[$-1] == '/' ? url : url ~ "/";
-        this.os = OperatingSystem(os);
+        this.os = os;
         this.content = byLine(url ~ "/" ~ "pkg_list_" ~ os);
     }
 
@@ -54,15 +54,22 @@ class Parser
     }
 }
 
+struct OperatingSystem
+{
 
-private:
-
-struct OperatingSystem {
-
-    string arch;
     string name;
+    string arch;
 
-    this(string os) {
+    alias toString this;
+
+    this(string name, string arch)
+    {
+        this.name = name;
+        this.arch = arch;
+    }
+
+    this(string os)
+    {
         auto result = splitter(os, "-").array;
         if (result.length == 2)
         {
@@ -74,7 +81,14 @@ struct OperatingSystem {
             throw new Exception("Bad OS");
         }
     }
+
+    string toString()
+    {
+        return name ~ "-" ~ arch;
+    }
 }
+
+private:
 
 enum PropertyName : string {
     Package = "Package",
