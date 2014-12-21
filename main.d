@@ -1,6 +1,6 @@
 ﻿module main;
 
-import pkgbuilder : Parser, OperatingSystem;
+import pkgbuilder : Parser, OperatingSystem, PkgBuilder;
 import std.stdio;
 import std.getopt;
 
@@ -15,11 +15,9 @@ void main(string[] args)
            "os_name", &os_name,
            "os_arch", &os_arch,
            );
-    
-    Parser parser = new Parser(url, OperatingSystem(os_name, os_arch));
 
-    parser.run();
-    parser.print();
+    PkgBuilder pkgBuilder = new PkgBuilder(url, os_name, os_arch);
+    pkgBuilder.generate();
 
     // Lets the user press <Return> before program returns
     stdin.readln();

@@ -6,7 +6,39 @@ import std.conv : to;
 import std.algorithm : splitter;
 import std.range : array;
 
-class Parser
+final class PkgBuilder
+{
+    this(string url, string osName, string osArch)
+    {
+        this(new Parser(url, OperatingSystem(osName, osArch)));
+    }
+
+    this(Parser parser)
+    {
+        if (parser.packagesInfo is null)
+        {
+            parser.run();
+        }
+        this.parser = parser;
+    }
+
+    void generate()
+    {
+        preparePkgBuilds();
+    }
+
+    void preparePkgBuilds()
+    {
+        parser.print();
+    }
+
+private:
+    Parser parser;
+}
+
+private:
+
+final class Parser
 {
     this(string url, OperatingSystem os)
     {
@@ -14,7 +46,7 @@ class Parser
         this.os = os;
         this.content = byLine(url ~ "/" ~ "pkg_list_" ~ os);
     }
-
+    
     void run()
     {
         PackageInfo pi;
@@ -43,7 +75,7 @@ class Parser
             }
         }
     }
-
+    
     void print()
     {
         size_t index;
@@ -52,7 +84,7 @@ class Parser
             writeln(to!string(++index) ~ ": " ~ pName ~ " : " ~ pData.name);
         }
     }
-
+    
 private:
     typeof(byLine("")) content;
     string url;
@@ -62,18 +94,18 @@ private:
 
 struct OperatingSystem
 {
-
+    
     string name;
     string arch;
-
+    
     alias toString this;
-
+    
     this(string name, string arch)
     {
         this.name = name;
         this.arch = arch;
     }
-
+    
     this(string os)
     {
         auto result = splitter(os, "-").array;
@@ -87,14 +119,12 @@ struct OperatingSystem
             throw new Exception("Bad OS");
         }
     }
-
+    
     string toString()
     {
         return name ~ "-" ~ arch;
     }
 }
-
-private:
 
 enum PropertyName : string
 {
