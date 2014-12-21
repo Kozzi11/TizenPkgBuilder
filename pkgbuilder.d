@@ -5,9 +5,13 @@ import std.net.curl : byLine;
 import std.conv : to;
 import std.algorithm : splitter;
 import std.range : array;
+import std.array : appender;
 
 final class PkgBuilder
 {
+    private Parser parser;
+    private auto pkg_builds = appender!(PkgBuild[])();
+
     this(string url, string osName, string osArch)
     {
         this(new Parser(url, OperatingSystem(osName, osArch)));
@@ -15,7 +19,7 @@ final class PkgBuilder
 
     this(Parser parser)
     {
-        if (parser.packagesInfo is null)
+        if (parser.packages_info is null)
         {
             parser.run();
         }
@@ -27,19 +31,21 @@ final class PkgBuilder
         preparePkgBuilds();
     }
 
-    void preparePkgBuilds()
+    private void preparePkgBuilds()
     {
-        parser.print();
-    }
 
-private:
-    Parser parser;
+    }
 }
 
 private:
 
 final class Parser
 {
+    typeof(byLine("")) content;
+    string url;
+    OperatingSystem os;
+    PackageInfo[string] packages_info;
+
     this(string url, OperatingSystem os)
     {
         this.url = url[$-1] == '/' ? url : url ~ "/";
@@ -52,25 +58,25 @@ final class Parser
         PackageInfo pi;
         foreach (line; content)
         {
-            auto lineData = splitter(line, ":");
-            if (!lineData.empty)
+            auto line_data = splitter(line, ":");
+            if (!line_data.empty)
             {
                 import std.string : strip;
                 
-                string field = strip(to!string(lineData.front));
+                string field = strip(to!string(line_data.front));
                 string value;
                 
-                lineData.popFront;
-                if (!lineData.empty)
+                line_data.popFront;
+                if (!line_data.empty)
                 {
-                    value = strip(to!string(lineData.front));
+                    value = strip(to!string(line_data.front));
                 }
                 
                 pi.fillProperty(field, value);
             }
             else
             {
-                packagesInfo[pi.name] = pi;
+                packages_info[pi.name] = pi;
                 pi = PackageInfo();
             }
         }
@@ -79,17 +85,11 @@ final class Parser
     void print()
     {
         size_t index;
-        foreach (pName, pData; packagesInfo)
+        foreach (pName, pData; packages_info)
         {
             writeln(to!string(++index) ~ ": " ~ pName ~ " : " ~ pData.name);
         }
     }
-    
-private:
-    typeof(byLine("")) content;
-    string url;
-    OperatingSystem os;
-    PackageInfo[string] packagesInfo;
 }
 
 struct OperatingSystem
@@ -214,4 +214,14 @@ struct PackageInfo
                  writeln(property);*/
         }
     }
+}
+
+struct PkgBuild
+{
+    string pkgname;
+    string pkgver;
+    string pkgdesc;
+    string arch;
+    auto groups = appender!(string[])();
+
 }
